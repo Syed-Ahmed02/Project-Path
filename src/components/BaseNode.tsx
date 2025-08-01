@@ -2,6 +2,7 @@
 import { memo } from "react";
  
 import { Button } from "@/components/ui/button";
+import { Input } from "./ui/input";
 import {
   BaseNode,
   BaseNodeContent,
@@ -10,30 +11,30 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/react-flow/base-node";
 import { Rocket } from "lucide-react";
+
+export type IdeaNodeSchema = {
+    data:{
+        message?:string;
+    }
+}
  
-export const BaseNodeFullDemo = memo(() => {
+export const IdeaNode = memo(({ data }: IdeaNodeSchema) => {
   return (
-    <BaseNode className="w-96">
+    <BaseNode className="w-96 shadow-md">
       <BaseNodeHeader className="border-b">
         <Rocket className="size-4" />
-        <BaseNodeHeaderTitle>Header</BaseNodeHeaderTitle>
+        <BaseNodeHeaderTitle>Idea Node</BaseNodeHeaderTitle>
       </BaseNodeHeader>
       <BaseNodeContent>
-        <h3 className="text-lg font-bold">Content</h3>
-        <p className="text-xs">
-          This is a full-featured node with a header, content, and footer. You
-          can customize it as needed.
-        </p>
+        <h3 className="text-lg font-bold">Describe your idea</h3>
+        <Input placeholder="Carpooling App" />
+        
+        <h3 className="text-lg font-bold">Niche (optional)</h3>
+        <Input placeholder="For broke collage students" />
       </BaseNodeContent>
-      <BaseNodeFooter>
-        <h4 className="text-md self-start font-bold">Footer</h4>
- 
-        <Button variant="outline" className="nodrag w-full">
-          Action 1
-        </Button>
-      </BaseNodeFooter>
+      
     </BaseNode>
   );
 });
  
-BaseNodeFullDemo.displayName = "BaseNodeFullDemo";
+IdeaNode.displayName = "IdeaNode";

@@ -3,17 +3,19 @@ import { ReactFlow, Background, Controls, BackgroundVariant, applyEdgeChanges, a
 import {NodeChange, EdgeChange, Node, Edge} from '@xyflow/react'
 import '@xyflow/react/dist/style.css';
 import { useCallback, useState } from 'react';
-import { BaseNodeFullDemo } from '@/components/BaseNode';
+import { IdeaNode } from '@/components/BaseNode';
 const nodeTypes = {
-    baseNode: BaseNodeFullDemo,
+    ideaNode:IdeaNode
   };
    
   const defaultNodes = [
     {
       id: "2",
       position: { x: 200, y: 200 },
-      data: {},
-      type: "baseNode",
+      data: {
+        message:"Hello World"
+      },
+      type: "ideaNode",
     },
   ];
 //   const initialEdges: Edge[] = [
@@ -38,7 +40,7 @@ export default function Canvas() {
     //   )
   return (
     
-    <div style={{ height: '100vh', width: '100vw' }} >
+    <div style={{ height: '100vh', width: '100vw' }} className="bg-background">
       <ReactFlow 
         // nodes={nodes} 
         // edges={edges} 
@@ -51,9 +53,9 @@ export default function Canvas() {
         // onConnect={onConnect}
       >
         <Background 
-        color="#fff"
-        variant={BackgroundVariant.Lines}
-        
+            variant={BackgroundVariant.Lines}
+            bgColor='transparent'
+            color='#cbd5e1'
         />
         <Controls />
       </ReactFlow>
