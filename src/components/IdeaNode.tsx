@@ -11,6 +11,8 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/react-flow/base-node";
 import { Rocket } from "lucide-react";
+import { BaseHandle } from "./base-handle";
+import { Position } from "@xyflow/react";
 
 export type IdeaNodeSchema = {
     data:{
@@ -21,6 +23,7 @@ export type IdeaNodeSchema = {
 export const IdeaNode = memo(({ data }: IdeaNodeSchema) => {
   return (
     <BaseNode className="w-96 shadow-md">
+      <BaseHandle id="source" type="source" position={Position.Left} />
       <BaseNodeHeader className="border-b">
         <Rocket className="size-4" />
         <BaseNodeHeaderTitle>Idea Node</BaseNodeHeaderTitle>
@@ -32,7 +35,7 @@ export const IdeaNode = memo(({ data }: IdeaNodeSchema) => {
         <h3 className="text-lg font-bold">Niche (optional)</h3>
         <Input placeholder="For broke collage students" />
       </BaseNodeContent>
-      
+      <BaseHandle id="target" type="target" position={Position.Right} />
     </BaseNode>
   );
 });

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { messages }: { messages: UIMessage[] } = await req.json();
 
     const result = streamText({
-      model: useOpenRouter.chat('meta-llama/llama-3.1-405b-instruct'),
+      model: useOpenRouter.chat('openrouter/horizon-beta'),
       messages: convertToModelMessages(messages),
     });
   
