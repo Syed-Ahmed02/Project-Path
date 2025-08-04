@@ -6,9 +6,11 @@ import { useCallback, useState } from 'react';
 import { IdeaNode } from '@/components/IdeaNode';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { GenerateNode } from '@/components/GenerateNode';
 
 const nodeTypes = {
-    ideaNode:IdeaNode
+    ideaNode:IdeaNode,
+    generateNode:GenerateNode
   };
    
 const defaultNodes: Node[] = [
@@ -16,7 +18,8 @@ const defaultNodes: Node[] = [
     id: "1",
     position: { x: 200, y: 200 },
     data: {
-      message:"Hello World"
+      idea:"Carpooling App",
+      niche:"For broke collage students"
     },
     type: "ideaNode",
   },
@@ -46,14 +49,15 @@ export default function Canvas() {
     []
   );
 
-  const addNewNode = useCallback(() => {
+  const addNewNode = useCallback((type:string) => {
     const newNode: Node = {
       id: `${Date.now()}`,
       position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
       data: {
-        message: "New Idea"
+        idea:"",
+        niche:""
       },
-      type: "ideaNode",
+      type: type,
     };
     
     setNodes((nds) => [...nds, newNode]);
@@ -61,13 +65,20 @@ export default function Canvas() {
 
   return (
     <div style={{ height: '100vh', width: '100vw' }} className="bg-background relative">
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-4 z-10 flex gap-2">
         <Button 
-          onClick={addNewNode}
+          onClick={() => addNewNode("ideaNode")}
           className="flex items-center gap-2"
         >
           <Plus className="size-4" />
-          Add Node
+          Add Idea Node
+        </Button>
+        <Button 
+          onClick={() => addNewNode("generateNode")}
+          className="flex items-center gap-2"
+        >
+          <Plus className="size-4" />
+          Add Generate Node
         </Button>
       </div>
       

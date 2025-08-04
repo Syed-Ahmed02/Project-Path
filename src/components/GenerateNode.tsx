@@ -12,7 +12,13 @@ import {
 } from "@/components/react-flow/base-node";
 import { Rocket } from "lucide-react";
 import { Node } from "@xyflow/react";
-
+import {
+    Handle,
+    Position,
+    useNodeConnections,
+    useNodesData,
+  } from '@xyflow/react';
+import { BaseHandle } from "./base-handle";
 export type GenerateNodeSchema = {
     data:{
         connectedNodes:Node[]
@@ -20,31 +26,51 @@ export type GenerateNodeSchema = {
 }
 
  
-export const GenerateNode = memo(({ data }: GenerateNodeSchema) => {
+export const GenerateNode = memo(() => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [clicked,setClicked] = useState(false);
     const [generatedText,setGeneratedText] = useState("");
     
-    const { completion, input, handleInputChange, handleSubmit} = useCompletion({
-        api: '/api/completion',
+    const connections = useNodeConnections({
+        handleType: 'target',
       });
-    
+      console.log("connections",connections);
+      const nodesData = useNodesData(
+        connections.map((connection) => connection.source),
+      );
+      console.log("nodesData",nodesData);
+
+      const input = nodesData.map((node) => node.data.idea).join("\n");
+      console.log("input",input);
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        setClicked(true);
+        const res = await fetch("/api/horizon",{
+            method:"POST",
+            body:JSON.stringify({input:input})
+        });
+        const result = await res.json();
+        setGeneratedText(result.text);
+        console.log("completion",result);
+        setIsLoading(false);
+        setClicked(false);
+    }
+    console.log("generatedText",generatedText);
     return (
         <BaseNode className="w-96 shadow-md">
+        <BaseHandle id="target" type="target" position={Position.Left} />
+
         <BaseNodeHeader className="border-b">
             <Rocket className="size-4" />
             <BaseNodeHeaderTitle>Generate Node</BaseNodeHeaderTitle>
         </BaseNodeHeader>
         <BaseNodeContent>
-        <form onSubmit={handleSubmit}>
             <Button onClick={()=>{
-                setIsLoading(true);
-                setClicked(true);
+                handleSubmit();
             }} disabled={isLoading}>Generate</Button>
-        </form>
         </BaseNodeContent>
-        
+
         </BaseNode>
     );    
 });         
