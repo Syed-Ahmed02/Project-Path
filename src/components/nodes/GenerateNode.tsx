@@ -18,8 +18,9 @@ import {
     useNodeConnections,
     useNodesData,
   } from '@xyflow/react';
-import { BaseHandle } from "./base-handle";
-export type GenerateNodeSchema = {
+
+import { BaseHandle } from "../react-flow/base-handle";
+  export type GenerateNodeSchema = {
     data:{
         connectedNodes:Node[]
     }

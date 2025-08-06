@@ -2,7 +2,7 @@
 import { memo } from "react";
  
 import { Button } from "@/components/ui/button";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import {
   BaseNode,
   BaseNodeContent,
@@ -11,7 +11,7 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/react-flow/base-node";
 import { Rocket } from "lucide-react";
-import { BaseHandle } from "./base-handle";
+import { BaseHandle } from "../react-flow/base-handle";
 import { Position, useNodeConnections, useReactFlow } from "@xyflow/react";
 
 export type IdeaNodeSchema = {

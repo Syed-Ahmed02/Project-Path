@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
-import ConvexClientProvider from '@/components/ConvexClientProvider'
+import ConvexClientProvider from '@/components/contexts/ConvexClientProvider'
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from '@/components/app-sidebar'
 
@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} `}>
       <SidebarProvider>
-        <AppSidebar />
+        {/* <AppSidebar /> */}
         <ClerkProvider>
           <ConvexClientProvider>
             <SidebarTrigger />
