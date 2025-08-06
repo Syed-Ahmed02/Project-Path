@@ -2,7 +2,7 @@
 import { memo } from "react";
 import {useEffect, useState} from "react";
 import { Button } from "@/components/ui/button";
-import { useCompletion } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 import {
   BaseNode,
   BaseNodeContent,
@@ -20,6 +20,7 @@ import {
   } from '@xyflow/react';
 
 import { BaseHandle } from "../react-flow/base-handle";
+import { DefaultChatTransport } from "ai";
   export type GenerateNodeSchema = {
     data:{
         connectedNodes:Node[]
@@ -44,19 +45,13 @@ export const GenerateNode = memo(() => {
 
       const input = nodesData.map((node) => node.data.idea).join("\n");
       console.log("input",input);
-    const handleSubmit = async () => {
-        setIsLoading(true);
-        setClicked(true);
-        const res = await fetch("/api/horizon",{
-            method:"POST",
-            body:JSON.stringify({input:input})
-        });
-        const result = await res.json();
-        setGeneratedText(result.text);
-        console.log("completion",result);
-        setIsLoading(false);
-        setClicked(false);
-    }
+   
+
+    const {messages,sendMessage,status} = useChat({
+      transport: new DefaultChatTransport({
+        api: '/api/horizon',
+      }),
+    });
     console.log("generatedText",generatedText);
     return (
         <BaseNode className="w-96 shadow-md">
@@ -68,10 +63,23 @@ export const GenerateNode = memo(() => {
         </BaseNodeHeader>
         <BaseNodeContent>
             <Button onClick={()=>{
-                handleSubmit();
-            }} disabled={isLoading}>Generate</Button>
+                sendMessage({
+                    text:input
+                });
+            }} disabled={status !='ready'}>Generate</Button>
         </BaseNodeContent>
-
+        <BaseNodeFooter>
+            <div>
+            {messages.map(message => (
+            <div key={message.id}>
+              {message.role === 'user' ? 'User: ' : 'AI: '}
+              {message.parts.map((part, index) =>
+                part.type === 'text' ? <span key={index}>{part.text}</span> : null,
+              )}
+            </div>
+          ))}
+            </div>
+        </BaseNodeFooter>
         </BaseNode>
     );    
 });         

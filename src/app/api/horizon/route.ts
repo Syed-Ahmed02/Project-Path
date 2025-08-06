@@ -5,12 +5,12 @@ import { useOpenRouter } from '../../../utils/useOpenRouter';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-    const { input }  = await req.json();
+  const { messages }: { messages: UIMessage[] } = await req.json();
 
     const result = streamText({
       model: useOpenRouter.chat('openrouter/horizon-beta'),
       system: "You are a helpful assistant that generates ideas for a startup.",
-      prompt: input,
+      messages: convertToModelMessages(messages),
     });
     console.log("result",result);
     return result.toUIMessageStreamResponse();

@@ -19,10 +19,7 @@ const defaultNodes: Node[] = [
   {
     id: "1",
     position: { x: 200, y: 200 },
-    data: {
-      idea:"Carpooling App",
-      niche:"For broke collage students"
-    },
+    data: {},
     type: "ideaNode",
   },
 ];
@@ -83,9 +80,6 @@ const CanvasFlow = () => {
     },
     [screenToFlowPosition, type],
   );
-
- 
-
 
 
   return (
