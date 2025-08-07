@@ -21,7 +21,8 @@ import {
 
 import { BaseHandle } from "../react-flow/base-handle";
 import { DefaultChatTransport } from "ai";
-  export type GenerateNodeSchema = {
+
+export type GenerateNodeSchema = {
     data:{
         connectedNodes:Node[]
     }
@@ -32,29 +33,43 @@ export const GenerateNode = memo(() => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [clicked,setClicked] = useState(false);
-    const [generatedText,setGeneratedText] = useState("");
-    
+    const [isNodeConnected,setIsNodeConnected] = useState(false);
     const connections = useNodeConnections({
         handleType: 'target',
       });
+
       console.log("connections",connections);
       const nodesData = useNodesData(
         connections.map((connection) => connection.source),
       );
-      console.log("nodesData",nodesData);
+      
+      const input = nodesData.map((node) => node.data);
+      useEffect(()=>{
+        console.log("input",input);
+       
+          setIsNodeConnected(true);
+        
+      },[input]);
 
-      const input = nodesData.map((node) => node.data.idea).join("\n");
-      console.log("input",input);
-   
-
-    const {messages,sendMessage,status} = useChat({
+     const {messages,sendMessage,status} = useChat({
       transport: new DefaultChatTransport({
-        api: '/api/horizon',
+        api: '/api/openai',
       }),
     });
-    console.log("generatedText",generatedText);
+
+    const handleGenerate = async () => {
+     
+        await sendMessage({
+          text:JSON.stringify(input),
+        });
+      
+    };
+
+    // Get the latest AI message for display
+   
+
     return (
-        <BaseNode className="w-96 shadow-md">
+        <BaseNode className="w-[600px] shadow-md">
         <BaseHandle id="target" type="target" position={Position.Left} />
 
         <BaseNodeHeader className="border-b">
@@ -62,22 +77,31 @@ export const GenerateNode = memo(() => {
             <BaseNodeHeaderTitle>Generate Node</BaseNodeHeaderTitle>
         </BaseNodeHeader>
         <BaseNodeContent>
-            <Button onClick={()=>{
+            <Button 
+              onClick={()=>{
                 sendMessage({
-                    text:input
+                  text:JSON.stringify(input),
                 });
-            }} disabled={status !='ready'}>Generate</Button>
+              }} 
+              disabled={!isNodeConnected}
+              className="w-full"
+            >
+              {status === 'streaming' ? 'Generating...' : 'Generate'}
+            </Button>
         </BaseNodeContent>
         <BaseNodeFooter>
-            <div>
+            <div className="p-4 w-full overflow-y-auto">
             {messages.map(message => (
-            <div key={message.id}>
-              {message.role === 'user' ? 'User: ' : 'AI: '}
-              {message.parts.map((part, index) =>
-                part.type === 'text' ? <span key={index}>{part.text}</span> : null,
-              )}
-            </div>
-          ))}
+              <div key={message.id} className="whitespace-pre-wrap">
+                {message.role === 'user' ? 'User: ' : 'AI: '}
+                {message.parts.map((part, i) => {
+                  switch (part.type) {
+                    case 'text':
+                      return <div key={`${message.id}-${i}`}>{part.text}</div>;
+                  }
+                })}
+              </div>
+            ))}
             </div>
         </BaseNodeFooter>
         </BaseNode>
