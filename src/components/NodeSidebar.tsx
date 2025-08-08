@@ -40,8 +40,32 @@ export default function NodeSidebar() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" className="w-full" >
+            <div onDragStart={(event) => onDragStart(event, 'nicheNode')} draggable>
+            Niche Node
+            </div>
+            </Button>
+            </TooltipTrigger> 
+            <TooltipContent>
+              <p>Drag me to the canvas</p>
+            </TooltipContent>
+            </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" className="w-full" >
             <div onDragStart={(event) => onDragStart(event, 'generateNode')} draggable>
             Generate Node
+            </div>
+            </Button>
+            </TooltipTrigger> 
+            <TooltipContent>
+              <p>Drag me to the canvas</p>
+            </TooltipContent>
+            </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" className="w-full" >
+            <div onDragStart={(event) => onDragStart(event, 'projectPlanNode')} draggable>
+            Project Plan Node
             </div>
             </Button>
             </TooltipTrigger> 

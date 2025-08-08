@@ -17,10 +17,13 @@ import {
     Position,
     useNodeConnections,
     useNodesData,
+      useReactFlow,
   } from '@xyflow/react';
 
 import { BaseHandle } from "../react-flow/base-handle";
 import { DefaultChatTransport } from "ai";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export type GenerateNodeSchema = {
     data:{
@@ -29,11 +32,14 @@ export type GenerateNodeSchema = {
 }
 
  
-export const GenerateNode = memo(() => {
+export const GenerateNode = memo(({ id }: { id: string }) => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [clicked,setClicked] = useState(false);
     const [isNodeConnected,setIsNodeConnected] = useState(false);
+    const [input, setInput] = useState('');
+    const { updateNodeData } = useReactFlow();
+
     const connections = useNodeConnections({
         handleType: 'target',
       });
@@ -43,26 +49,28 @@ export const GenerateNode = memo(() => {
         connections.map((connection) => connection.source),
       );
       
-      const input = nodesData.map((node) => node.data);
       useEffect(()=>{
-        console.log("input",input);
-       
-          setIsNodeConnected(true);
-        
-      },[input]);
+        const obj = nodesData.map((node) => node.data);
+        setInput(JSON.stringify(obj));
+        const types = nodesData.map((n: any) => n.type);
+        const numIdeas = types.filter((t: string) => t === 'ideaNode').length;
+        const numNiche = types.filter((t: string) => t === 'nicheNode').length;
+        const total = types.length;
+        const valid = (total === 1 && numIdeas === 1)
+          || (total === 2 && ((numIdeas === 2 && numNiche === 0) || (numIdeas === 1 && numNiche === 1)));
+        setIsNodeConnected(valid);
+      },[nodesData]);
 
-     const {messages,sendMessage,status} = useChat({
+      const upsertNode = useMutation(api.nodes.upsertNode);
+
+      const {messages,sendMessage,status} = useChat({
       transport: new DefaultChatTransport({
         api: '/api/openai',
       }),
     });
 
     const handleGenerate = async () => {
-     
-        await sendMessage({
-          text:JSON.stringify(input),
-        });
-      
+        await sendMessage({ text: JSON.stringify(input) });
     };
 
     // Get the latest AI message for display
@@ -79,9 +87,7 @@ export const GenerateNode = memo(() => {
         <BaseNodeContent>
             <Button 
               onClick={()=>{
-                sendMessage({
-                  text:JSON.stringify(input),
-                });
+                handleGenerate();
               }} 
               disabled={!isNodeConnected}
               className="w-full"
@@ -97,6 +103,11 @@ export const GenerateNode = memo(() => {
                 {message.parts.map((part, i) => {
                   switch (part.type) {
                     case 'text':
+                      // Persist the latest assistant idea output on render
+                      if (message.role === 'assistant') {
+                        upsertNode({ nodeId: id, type: 'generate', data: { output: part.text } }).catch(() => {});
+                        updateNodeData(id, { data: { output: part.text } });
+                      }
                       return <div key={`${message.id}-${i}`}>{part.text}</div>;
                   }
                 })}

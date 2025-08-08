@@ -4,15 +4,19 @@ import {NodeChange, EdgeChange, Node, Edge} from '@xyflow/react'
 import '@xyflow/react/dist/style.css';
 import { useCallback, useState } from 'react';
 import { IdeaNode } from '@/components/nodes/IdeaNode';
+import { NicheNode } from '@/components/nodes/NicheNode';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { GenerateNode } from '@/components/nodes/GenerateNode';
+import { ProjectPlanNode } from '@/components/nodes/ProjectPlanNode';
 import { DnDProvider,useDnD } from '@/components/contexts/DnDContext';
 import NodeSidebar from '@/components/NodeSidebar';
 
 const nodeTypes = {
-    ideaNode:IdeaNode,
-    generateNode:GenerateNode
+    ideaNode: IdeaNode,
+    nicheNode: NicheNode,
+    generateNode: GenerateNode,
+    projectPlanNode: ProjectPlanNode,
   };
    
 const defaultNodes: Node[] = [
@@ -46,8 +50,46 @@ const CanvasFlow = () => {
   );
   
   const onConnect: OnConnect = useCallback(
-    (params) => setEdges((edgesSnapShot) => addEdge(params, edgesSnapShot)),
-    []
+    (params) => {
+      setEdges((edgesSnapShot) => {
+        const sourceNode = nodes.find((n) => n.id === params.source);
+        const targetNode = nodes.find((n) => n.id === params.target);
+        if (!sourceNode || !targetNode) return edgesSnapShot;
+
+        // Rules:
+        // - Generate node accepts sources from Idea or Niche
+        // - Limit to max 2 total incoming
+        // - Allow at most 1 Niche connection
+        if (targetNode.type === 'generateNode') {
+          if (!(sourceNode.type === 'ideaNode' || sourceNode.type === 'nicheNode')) {
+            return edgesSnapShot;
+          }
+          const existingIncoming = edgesSnapShot.filter((e) => e.target === params.target);
+          const totalAfter = existingIncoming.length + 1;
+          if (totalAfter > 2) return edgesSnapShot;
+          const existingSources = existingIncoming.map((e) => nodes.find((n) => n.id === e.source)).filter(Boolean) as Node[];
+          const nicheCount = existingSources.filter((n) => n.type === 'nicheNode').length + (sourceNode.type === 'nicheNode' ? 1 : 0);
+          if (nicheCount > 1) return edgesSnapShot;
+          // Disallow niche-only connection (must include at least one idea)
+          if (existingIncoming.length === 0 && sourceNode.type === 'nicheNode') return edgesSnapShot;
+          // ok
+          return addEdge(params, edgesSnapShot);
+        }
+
+        // - Project Plan node only accepts from Generate node
+        // - Only one incoming connection
+        if (targetNode.type === 'projectPlanNode') {
+          if (sourceNode.type !== 'generateNode') return edgesSnapShot;
+          const existingIncoming = edgesSnapShot.filter((e) => e.target === params.target);
+          if (existingIncoming.length > 0) return edgesSnapShot;
+          return addEdge(params, edgesSnapShot);
+        }
+
+        // disallow all other target types
+        return edgesSnapShot;
+      });
+    },
+    [nodes]
   );
 
   const onDragOver = useCallback((event:React.DragEvent<HTMLDivElement>) => {
@@ -60,7 +102,6 @@ const CanvasFlow = () => {
     (event:React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
  
-      // check if the dropped element is valid
       if (!type) {
         return;
       }
